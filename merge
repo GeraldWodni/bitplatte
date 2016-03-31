@@ -6,4 +6,5 @@ echo -e "compiletoflash\n" >> bitplatte.fs
 cat utils.fs		>> bitplatte.fs
 cat pll.fs		>> bitplatte.fs
 cat delay.fs		>> bitplatte.fs
+cat io.fs		>> bitplatte.fs
 echo -e "\ncornerstone cold\n" >> bitplatte.fs

@@ -25,3 +25,6 @@
           eraseflashfrom
 ;
 
+: key-flush ( -- )
+	begin key? while key drop repeat ;
+
