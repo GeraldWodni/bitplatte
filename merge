@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# base functions
+echo -e "eraseflash\n\n\n" > bitplatte.fs
+echo -e "compiletoflash\n" >> bitplatte.fs
+cat utils.fs		>> bitplatte.fs
+cat pll.fs		>> bitplatte.fs
+cat delay.fs		>> bitplatte.fs
+echo -e "\ncornerstone cold\n" >> bitplatte.fs
