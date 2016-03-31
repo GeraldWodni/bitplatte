@@ -7,10 +7,14 @@ compiletoflash
 : init-motor ( -- )
     $E PORTF_DEN !
     $E PORTF_DIR !
-    $E PORTF_DATA ! ;
+    $0 PORTF_DATA ! ;
 
 create pattern $8 c, $C c, $4 c, $6 c, $2 c, $A c,
 6 constant pattern#
+
+\ create pattern $8 c, $4 c, $2 c, 
+\ 3 constant pattern#
+
 0 variable pos
 
 50 variable delay
@@ -26,18 +30,31 @@ create pattern $8 c, $C c, $4 c, $6 c, $2 c, $A c,
 : steps ( n -- )
     0 do
         step
-        delay @ us
+        delay @ ms
     loop ;
 
-: init
-    init
-    init-delay
-    init-motor
+: endless
     ." press any key to abort"
     2000 ms
     key-flush
     begin
         step
-        delay @ us
-    key? until key drop ;
+        delay @ ms
+    key? until ;
 
+: istep 
+    ta-irq-ack
+    step ;
+
+
+: init
+    init
+    init-delay
+    init-motor
+    ['] istep irq-timer0a !
+    50000 Timer0A_Init \ 50 ms
+    \ endless
+    \ 0 PORTF_DATA !
+    ;
+
+: ta timer0a_init ;
