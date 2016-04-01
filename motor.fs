@@ -2,6 +2,9 @@ cold
 
 compiletoflash
 
+\ 2 constant led-red
+\ 8 constant led-green
+\ 4 constant led-blue
 
 \ enable led ports
 : init-motor ( -- )
@@ -9,20 +12,28 @@ compiletoflash
     $E PORTF_DIR !
     $0 PORTF_DATA ! ;
 
-create pattern $8 c, $C c, $4 c, $6 c, $2 c, $A c,
-6 constant pattern#
+: off $0 PORTF_DATA ! ;
 
-\ create pattern $8 c, $4 c, $2 c, 
-\ 3 constant pattern#
+\ create pattern $8 c, $C c, $4 c, $6 c, $2 c, $A c,
+\ 6 constant pattern#
+\ create pattern $8 c, $0 c, $0 c, $0 c, $4 c, $0 c, $0 c, $0 c, $2 c, $0 c, $0 c, $0 c,
+\ 3 9 + constant pattern#
+
+create pattern $8 c, $4 c, $2 c,
+\ create pattern $6 c, $A c, $C c,
+3 constant pattern#
 
 0 variable pos
 
-50 variable delay
+50000 variable delay
+5000 variable md
 
 : step ( -- )
     \ increment counter, keep bounds
     pos @ 1+ dup pattern# >= if
         drop 0
+        delay @ 9 * 10 / md @ max dup delay !
+        ta-init
     then
     dup pattern + c@ PORTF_DATA !
     pos ! ;

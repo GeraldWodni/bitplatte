@@ -33,6 +33,7 @@ $00000001 constant TIMER_ICR_TATOCINT      \ GPTM TimerA Time-Out Raw Interrupt
 $40030028 constant TIMER0_TAILR_R        
 $0000FFFF constant TIMER_TAILR_TAILRL_M    \ GPTM TimerA Interval Load Register Low
 $40030038 constant TIMER0_TAPR_R         
+$40030050 constant TIMER0_TAV_R         
 
  
 \ Activate Timer0A interrupts to run user task periodically
@@ -56,7 +57,8 @@ $40030038 constant TIMER0_TAPR_R
     TIMER_TAMR_TAMR_PERIOD TIMER0_TAMR_R !
 
     \ 4) reload value
-    1- TIMER0_TAILR_R ! ( counts down from R0 to 0 )
+    1- dup TIMER0_TAILR_R ! ( counts down from R0 to 0 )
+    TIMER0_TAV_R ! ( set current time value )
 
     \ 5) 1us timer0A
     16 80 * 1- TIMER0_TAPR_R ! ( divide clock by 16 for 1 us time base )
@@ -83,6 +85,17 @@ $40030038 constant TIMER0_TAPR_R
 
 $40030024 constant TIMER0_ICR_R       
 $00000001 constant TIMER_ICR_TATOCINT    \ GPTM TimerA Time-Out Raw Interrupt
+
+: ta-off ( -- )
+    TIMER_CTL_TAEN TIMER0_CTL_R bic! ( set enable bit )
+    ;
+
+: ta-on ( -- )
+    TIMER_CTL_TAEN TIMER0_CTL_R bis! ( set enable bit )
+    ;
+
+: ta-init ( n-us -- )
+    Timer0A_Init ;
 
 : ta-irq-ack
   TIMER_ICR_TATOCINT  TIMER0_ICR_R !  \ Acknowledge timer0A timeout
