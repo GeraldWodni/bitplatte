@@ -26,13 +26,30 @@ create pattern $8 c, $4 c, $2 c,
 0 variable pos
 
 50000 variable delay
-5000 variable md
+5000 variable md \ min-delay
+100 variable dsd \ delay step divider
+dsd @ variable cdsd \ current dsd
+10 variable ds \ delay-step
+
+\ fraction minimizer 9/10 of teh 3 prior steps
+: fracmin ( n1 -- n2 )
+    9 * 10 / md @ max ;
+
+: submin ( -- n )
+    cdsd @ 1- dup cdsd ! 0= if
+        dsd @ cdsd ! \ reset cdsd
+        ds @ - md @ max \ update md
+    then ;
+
+' fracmin variable minimizer
 
 : step ( -- )
     \ increment counter, keep bounds
     pos @ 1+ dup pattern# >= if
         drop 0
-        delay @ 9 * 10 / md @ max dup delay !
+        delay @
+        minimizer @ execute
+        dup delay !
         ta-init
     then
     dup pattern + c@ PORTF_DATA !
