@@ -14,34 +14,55 @@ compiletoflash
 
 : off $0 PORTF_DATA ! ;
 
-\ create pattern $8 c, $C c, $4 c, $6 c, $2 c, $A c,
-\ 6 constant pattern#
+create pattern $8 c, $C c, $4 c, $6 c, $2 c, $A c,
+6 constant pattern#
 \ create pattern $8 c, $0 c, $0 c, $0 c, $4 c, $0 c, $0 c, $0 c, $2 c, $0 c, $0 c, $0 c,
 \ 3 9 + constant pattern#
 
-create pattern $8 c, $4 c, $2 c,
 \ create pattern $6 c, $A c, $C c,
-3 constant pattern#
+\ create pattern $8 c, $4 c, $2 c,
+\ 3 constant pattern#
 
 0 variable pos
 
-50000 variable delay
-5000 variable md \ min-delay
-100 variable dsd \ delay step divider
+20000 variable delay
+2000 variable md \ min-delay
+12 variable dsd \ delay step divider
 dsd @ variable cdsd \ current dsd
-10 variable ds \ delay-step
+1 variable ds \ delay-step
+9900 variable fd \ fractional-delay
 
-\ fraction minimizer 9/10 of teh 3 prior steps
-: fracmin ( n1 -- n2 )
-    9 * 10 / md @ max ;
+0 variable minimizer
 
+\ linear minimizer
 : submin ( -- n )
     cdsd @ 1- dup cdsd ! 0= if
         dsd @ cdsd ! \ reset cdsd
         ds @ - md @ max \ update md
     then ;
 
-' fracmin variable minimizer
+\ fraction minimizer 9/10 of teh 3 prior steps
+: fracmin ( n1 -- n2 )
+    \ md reached, check for new parameters
+    dup md @ = if
+        md @ case
+            2000 of \ slower ramp
+                1500 md !
+                9990 fd !
+            endof
+            1500 of \ slowest ramp
+                1000 md !
+                9999 fd !
+            endof
+            1000 of \ linear speedup
+                ['] submin minimizer !
+                800 md !
+            endof
+        endcase
+    then
+
+    fd @ * 10000 / md @ max ;
+
 
 : step ( -- )
     \ increment counter, keep bounds
@@ -79,10 +100,12 @@ dsd @ variable cdsd \ current dsd
     init
     init-delay
     init-motor
+    ['] fracmin minimizer !
     ['] istep irq-timer0a !
     50000 Timer0A_Init \ 50 ms
     \ endless
     \ 0 PORTF_DATA !
     ;
 
-: ta timer0a_init ;
+\ helper to investigate startups
+: d delay @ . ;
