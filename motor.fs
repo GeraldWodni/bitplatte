@@ -16,6 +16,8 @@ compiletoflash
 
 create pattern $8 c, $C c, $4 c, $6 c, $2 c, $A c,
 6 constant pattern#
+
+create colors $FF0000 , $FF0000 , $00FF00 , $00FF00 , $0000FF , $0000FF ,
 \ create pattern $8 c, $0 c, $0 c, $0 c, $4 c, $0 c, $0 c, $0 c, $2 c, $0 c, $0 c, $0 c,
 \ 3 9 + constant pattern#
 
@@ -74,6 +76,7 @@ dsd @ variable cdsd \ current dsd
         ta-init
     then
     dup pattern + c@ PORTF_DATA !
+    dup colors + @ leds n-leds \ change colors
     pos ! ;
 
 : steps ( n -- )
@@ -97,8 +100,9 @@ dsd @ variable cdsd \ current dsd
 
 
 : init
-    init
+    80MHz
     init-delay
+    init-ws
     init-motor
     ['] fracmin minimizer !
     ['] istep irq-timer0a !
